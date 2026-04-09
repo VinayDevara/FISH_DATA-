@@ -1,3 +1,11 @@
+# =============================================================
+# REQUIREMENTS:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+#   pip install segment-anything opencv-python tqdm
+#   Download checkpoint: sam_vit_b_01ec64.pth (auto-downloaded if missing)
+# RTX GPU: Will automatically use CUDA for fast processing (~2hrs)
+# CPU only: Will fall back to CPU (very slow, ~15hrs)
+# =============================================================
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 import cv2
@@ -20,8 +28,16 @@ def main():
     if not os.path.exists(checkpoint_path):
         os.system(f"powershell -c \"Invoke-WebRequest -Uri 'https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth' -OutFile '{checkpoint_path}'\"")
 
-    DEVICE = "cpu"
-    print(f"Loading SAM on {DEVICE} (Running in safe mode for 4GB VRAM limit)...")
+    # Auto-detect GPU — uses CUDA if available (RTX), otherwise CPU
+    if torch.cuda.is_available():
+        DEVICE = "cuda"
+        gpu_name = torch.cuda.get_device_name(0)
+        vram_gb = torch.cuda.get_device_properties(0).total_memory / 1e9
+        print(f"Loading SAM on GPU: {gpu_name} ({vram_gb:.1f}GB VRAM) - FAST MODE")
+    else:
+        DEVICE = "cpu"
+        print("No GPU detected. Loading SAM on CPU (slow mode)...")
+    
     sam = sam_model_registry["vit_b"](checkpoint=checkpoint_path)
     sam.to(device=DEVICE)
     predictor = SamPredictor(sam)

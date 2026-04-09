@@ -56,8 +56,13 @@ def process_view(frame_dir, view, raw_file, mask_file, predictor):
     print(f"Successfully processed {view} view.")
 
 def main():
-    print("Loading SAM Model onto CPU...")
-    DEVICE = "cpu"
+    # Auto-detect: uses CUDA on RTX, falls back to CPU
+    if torch.cuda.is_available():
+        DEVICE = "cuda"
+        print(f"Loading SAM on GPU: {torch.cuda.get_device_name(0)} - FAST MODE")
+    else:
+        DEVICE = "cpu"
+        print("Loading SAM Model onto CPU (no GPU detected)...")
     checkpoint_path = "sam_vit_b_01ec64.pth"
     sam = sam_model_registry["vit_b"](checkpoint=checkpoint_path)
     sam.to(device=DEVICE)

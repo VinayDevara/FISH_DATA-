@@ -1,0 +1,15 @@
+# Fish Biometrics SAM Benchmark - Requirements
+# Install PyTorch with CUDA 12.1 support (for RTX GPU):
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+# Then install the rest:
+#   pip install -r requirements.txt
+
+segment-anything
+opencv-python
+numpy
+pandas
+tqdm
+matplotlib
+
+# SAM checkpoint (download manually or the script auto-downloads it):
+# https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth
